@@ -21,7 +21,7 @@ frontend lb-server
     default_backend app-server
 
 frontend lb-server-https
-    bind *:443 ssl crt /etc/letsencrypt/boukadi.tech.pem
+    bind *:443 ssl crt /etc/letsencrypt/elhadiri.tech.pem
     reqadd X-Forwarded-Proto:\ https
     acl letsencrypt-acl path_beg /.well-known/acme-challenge/
     use_backend letsencrypt-backend if letsencrypt-acl
