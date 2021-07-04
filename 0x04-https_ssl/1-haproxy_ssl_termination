@@ -10,6 +10,8 @@ global
 defaults
     log global
     mode http
+    option forwardfor
+    option http-server-close
     option httplog
     option dontlognull
     timeout connect 5000
@@ -22,6 +24,7 @@ frontend lb-server
 
 frontend lb-server-https
     bind *:443 ssl crt /etc/letsencrypt/boukadi.tech.pem
+    http-request redirect scheme https unless { ssl_fc }
     reqadd X-Forwarded-Proto:\ https
     acl letsencrypt-acl path_beg /.well-known/acme-challenge/
     use_backend letsencrypt-backend if letsencrypt-acl
