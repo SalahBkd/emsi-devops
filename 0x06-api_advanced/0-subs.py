@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
-"""[SUBREDDIT]
-"""
-
+"""[SUBREDDIT]"""
 
 def number_of_subscribers(subreddit):
     import requests
