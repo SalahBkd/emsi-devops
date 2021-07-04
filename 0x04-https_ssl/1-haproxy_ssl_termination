@@ -31,7 +31,7 @@ frontend lb-server-https
 
 backend app-server
     balance roundrobin
-    http-request redirect scheme https if !{ ssl_fc }
+    redirect scheme https if !{ ssl_fc }
     server 3166-web-01 104.196.128.10:80 check
     server 3166-web-02 35.196.89.43:80 check
 
