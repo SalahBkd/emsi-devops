@@ -1,52 +1,47 @@
 #!/usr/bin/python3
-'''module: 100-count
-'''
-
+'''Get ALL hot posts'''
+import pprint
+import re
 import requests
 
-
-def tally(titles, word_dict={}):
-    '''tally: in a list of titles, increment the count of word occurences
-    in the word_dict
-    return: updated word_dict'''
-    for title in titles:
-        words = title.split(" ")
-        for word in words:
-            for target in word_dict:
-                if word.lower() == target.lower():
-                    word_dict[target] += 1
-    # print(word_dict)
-    return word_dict
+BASE_URL = 'http://reddit.com/r/{}/hot.json'
 
 
-def count_words(subreddit, word_list, counter=0, word_dict={}, after=None):
-    '''count_words: hit reddit api and track the frequency of keywords in the
-    word list
-    '''
+def count_words(subreddit, word_list, hot_list=[], after=None):
+    '''Get ALL hot posts'''
+    headers = {'User-agent': 'Unix:0-subs:v1'}
+    params = {'limit': 100}
+    if isinstance(after, str):
+        if after != "STOP":
+            params['after'] = after
+        else:
+            return print_results(word_list, hot_list)
 
-    # print("counter: {}".format(counter))
-    # exit case
-    if counter != 0 and after is None:
-        tuples = reversed(sorted(word_dict.items(), key=lambda x: x[1]))
-        for tuple in tuples:
-            print("{}: {}".format(tuple[0], tuple[1]))
-        return
+    response = requests.get(BASE_URL.format(subreddit),
+                            headers=headers, params=params)
+    if response.status_code != 200:
+        return None
+    data = response.json().get('data', {})
+    after = data.get('after', 'STOP')
+    if not after:
+        after = "STOP"
+    hot_list = hot_list + [post.get('data', {}).get('title')
+                           for post in data.get('children', [])]
+    return count_words(subreddit, word_list, hot_list, after)
 
-    headers = {"User-Agent": "larry-agent"}
 
-    if counter == 0:
-        payload = {}
+def print_results(word_list, hot_list):
+    '''Prints request results'''
+    count = {}
+    for word in word_list:
+        count[word] = 0
+    for title in hot_list:
         for word in word_list:
-            word_dict[word] = 0
-    else:
-        payload = {'after': after, 'count': 25}
+            count[word] = count[word] +\
+             len(re.findall(r'(?:^| ){}(?:$| )'.format(word), title, re.I))
 
-    url = "https://reddit.com/r/" + subreddit + "/hot/.json"
-    r = requests.get(url, headers=headers, params=payload)
-    ps = r.json().get("data").get("children")
-    posts = [post.get("data").get("title") for post in ps]
-    word_dict = tally(posts, word_dict)
-    after = r.json().get("data").get("after")
-
-    return count_words(subreddit, word_list, counter+1, word_dict, after)
-
+    count = {k: v for k, v in count.items() if v > 0}
+    words = sorted(list(count.keys()))
+    for word in sorted(words,
+                       reverse=True, key=lambda k: count[k]):
+        print("{}: {}".format(word, count[word]))
