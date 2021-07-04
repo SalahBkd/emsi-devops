@@ -17,3 +17,4 @@ def top_ten(subreddit):
     else:
         [print(child['data']['title'])
          for child in req.json()['data']['children']]
+
