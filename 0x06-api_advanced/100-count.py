@@ -58,5 +58,4 @@ def count_words(subreddit, word_list, after="", word_dic={}):
 
     except:
         return None
-
     count_words(subreddit, word_list, after, word_dic)
