@@ -20,7 +20,7 @@ defaults
 
 frontend lb-server
     bind *:80
-    default_backend app-server 
+    default_backend app-server
 
 frontend lb-server-https
     bind *:443 ssl crt /etc/letsencrypt/boukadi.tech.pem
